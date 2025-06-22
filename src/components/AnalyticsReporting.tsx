@@ -244,25 +244,26 @@ const AnalyticsReporting = () => {
                 <CardDescription>Sales performance by channel</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {[
-                    { channel: "Amazon", orders: 847, revenue: "$156,234", growth: "+12.3%" },
-                    { channel: "Shopify", orders: 234, revenue: "$45,678", growth: "+8.7%" },
-                    { channel: "eBay", orders: 123, revenue: "$23,456", growth: "+5.2%" },
-                    { channel: "Walmart", orders: 43, revenue: "$12,789", growth: "+15.8%" }
-                  ].map((channel, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <h4 className="font-semibold">{channel.channel}</h4>
-                        <p className="text-sm text-gray-600">{channel.orders} orders</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold">{channel.revenue}</p>
-                        <p className="text-sm text-green-600">{channel.growth}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart 
+                    data={[
+                      { channel: "Amazon", orders: 847, revenue: 156234 },
+                      { channel: "Shopify", orders: 234, revenue: 45678 },
+                      { channel: "Walmart", orders: 156, revenue: 32456 },
+                      { channel: "Direct", orders: 98, revenue: 21890 },
+                    ]}
+                    margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="channel" />
+                    <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
+                    <YAxis yAxisId="right" orientation="right" stroke="#82ca9d" />
+                    <Tooltip formatter={(value: number, name) => name === 'revenue' ? `$${value.toLocaleString()}` : value.toLocaleString()} />
+                    <Legend />
+                    <Bar yAxisId="left" dataKey="revenue" fill="#8884d8" name="Revenue" />
+                    <Bar yAxisId="right" dataKey="orders" fill="#82ca9d" name="Orders" />
+                  </BarChart>
+                </ResponsiveContainer>
               </CardContent>
             </Card>
           </div>
@@ -270,20 +271,21 @@ const AnalyticsReporting = () => {
           {/* Performance Trends Chart Placeholder */}
           <Card>
             <CardHeader>
-              <CardTitle>Performance Trends</CardTitle>
-              <CardDescription>Key metrics over time</CardDescription>
+              <CardTitle>Performance Trend</CardTitle>
+              <CardDescription>7-day order volume and fulfillment rate</CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={performanceTrendData}>
+                <LineChart data={performanceTrendData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" />
-                  <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
-                  <YAxis yAxisId="right" orientation="right" stroke="#82ca9d" />
-                  <Tooltip />
+                  <YAxis yAxisId="left" />
+                  <YAxis yAxisId="right" orientation="right" domain={[95, 100]} tickFormatter={(tick) => `${tick}%`}/>
+                  <Tooltip formatter={(value: number, name) => name === 'Fulfillment Rate' ? `${value}%` : value} />
                   <Legend />
-                  <Bar yAxisId="left" dataKey="Order Volume" fill="#8884d8" />
-                </BarChart>
+                  <Line yAxisId="left" type="monotone" dataKey="Order Volume" stroke="#8884d8" strokeWidth={2} />
+                  <Line yAxisId="right" type="monotone" dataKey="Fulfillment Rate" stroke="#82ca9d" strokeWidth={2} />
+                </LineChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
@@ -358,74 +360,42 @@ const AnalyticsReporting = () => {
         <TabsContent value="analysis" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Stock Analysis</CardTitle>
-              <CardDescription>Deep dive into stock value, movement, and aging</CardDescription>
+              <CardTitle>Stock Value by Category</CardTitle>
+              <CardDescription>Current inventory value distribution</CardDescription>
             </CardHeader>
             <CardContent>
-            <table className="w-full text-left">
-                <thead>
-                  <tr className="border-b">
-                    <th className="p-3">Category</th>
-                    <th className="p-3 text-right">Stock Value</th>
-                    <th className="p-3 text-right">Total Items</th>
-                    <th className="p-3 text-center">Movement Rate</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {stockAnalysis.map((item, index) => (
-                    <tr key={index} className="border-b hover:bg-gray-50">
-                      <td className="p-3 font-medium text-gray-800">{item.category}</td>
-                      <td className="p-3 text-right text-gray-600">${item.value.toLocaleString()}</td>
-                      <td className="p-3 text-right text-gray-600">{item.items}</td>
-                      <td className="p-3 text-center">
-                        <Badge className={
-                          item.movement === 'high' ? "bg-green-100 text-green-800" :
-                          item.movement === 'medium' ? "bg-yellow-100 text-yellow-800" :
-                          "bg-red-100 text-red-800"
-                        }>
-                          {item.movement}
-                        </Badge>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <ResponsiveContainer width="100%" height={400}>
+                <BarChart data={stockAnalysis} layout="vertical" margin={{ top: 5, right: 30, left: 30, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" tickFormatter={(value) => `$${(value as number / 1000000).toFixed(1)}M`} />
+                  <YAxis dataKey="category" type="category" width={100} />
+                  <Tooltip formatter={(value) => `$${(value as number).toLocaleString()}`} />
+                  <Legend />
+                  <Bar dataKey="value" name="Stock Value" fill="#8884d8" />
+                </BarChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="forecasting" className="space-y-4">
-           <Card>
+          <Card>
             <CardHeader>
-              <CardTitle>Demand Forecasting</CardTitle>
-              <CardDescription>Predict future sales based on historical data</CardDescription>
+              <CardTitle>Sales Forecast vs. Historical</CardTitle>
+              <CardDescription>Monthly sales data and future demand predictions</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex justify-between items-center p-4 border rounded-lg">
-                <div>
-                  <h4 className="font-semibold">Forecasting Settings</h4>
-                  <p className="text-sm text-gray-500">Adjust parameters for forecast generation</p>
-                </div>
-                <div className="flex space-x-4">
-                   <Button variant="outline">Last 6 Months</Button>
-                   <Button variant="outline">Seasonal Trend Model</Button>
-                   <Button>Generate Forecast</Button>
-                </div>
-              </div>
-
-              <div>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={forecastData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line type="monotone" dataKey="Historical Sales" stroke="#8884d8" strokeWidth={2} />
-                    <Line type="monotone" dataKey="Forecasted Sales" stroke="#82ca9d" strokeWidth={2} strokeDasharray="5 5" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={400}>
+                <BarChart data={forecastData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => (value as number).toLocaleString()} />
+                  <Legend />
+                  <Bar dataKey="Historical Sales" fill="#8884d8" />
+                  <Bar dataKey="Forecasted Sales" fill="#82ca9d" />
+                </BarChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
         </TabsContent>
